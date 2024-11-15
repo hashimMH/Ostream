@@ -21,7 +21,7 @@ This repository contains a comprehensive solution for managing document opinion 
 
 The repository is organized as follows:
 
-\`\`\`bash
+```bash
 .
 ├── web-frontend/    # Web frontend codebase (React application)
 │   ├── public/      # Static files
@@ -33,14 +33,14 @@ The repository is organized as follows:
 │   ├── app/         # Django app with models, views, and templates
 │   └── requirements.txt # Backend dependencies
 │
-├── mobile-apps/     # Mobile applications (React Native)
+├── mobile-apps/     # Mobile applications (Flutter)
 │   ├── ios/         # iOS-specific files
 │   ├── android/     # Android-specific files
-│   ├── src/         # Shared components and services
-│   └── package.json # Mobile app dependencies
+│   ├── lib/         # Dart source files
+│   └── pubspec.yaml # Flutter dependencies
 │
 └── README.md        # Documentation
-\`\`\`
+```
 
 ---
 
@@ -58,20 +58,20 @@ The web frontend is built using **React** to provide a dynamic and user-friendly
 #### Commands:
 
 1. **Install dependencies**:  
-   \`\`\`bash
+   ```bash
    cd web-frontend
    npm install
-   \`\`\`
+   ```
 
 2. **Run development server**:  
-   \`\`\`bash
+   ```bash
    npm start
-   \`\`\`
+   ```
 
 3. **Build for production**:  
-   \`\`\`bash
+   ```bash
    npm run build
-   \`\`\`
+   ```
 
 ---
 
@@ -89,28 +89,28 @@ The backend is a **Django** application for handling API requests and managing d
 #### Commands:
 
 1. **Set up virtual environment**:  
-   \`\`\`bash
+   ```bash
    python -m venv env
    source env/bin/activate  # On Windows: env\Scripts\activate
-   \`\`\`
+   ```
 
 2. **Install dependencies**:  
-   \`\`\`bash
+   ```bash
    pip install -r requirements.txt
-   \`\`\`
+   ```
 
 3. **Run development server**:  
-   \`\`\`bash
+   ```bash
    python manage.py runserver
-   \`\`\`
+   ```
 
 4. **Environment variables**:  
    Create a `.env` file in the `backend` folder with the following structure:
-   \`\`\`
+   ```
    SECRET_KEY=your_django_secret_key
    DATABASE_URL=postgres://user:password@localhost:5432/project_db
    DEBUG=True
-   \`\`\`
+   ```
 
 ---
 
@@ -118,30 +118,34 @@ The backend is a **Django** application for handling API requests and managing d
 
 ### Location: `mobile-apps/`
 
-The mobile applications are built using **React Native**, ensuring compatibility across iOS and Android devices.
+The mobile applications are built using **Flutter**, ensuring compatibility across iOS and Android devices.
 
 #### Key Features:
-- Push notifications
-- Offline support
-- User-friendly interface
+- Cross-platform support
+- Smooth UI with Material Design
+- Offline capabilities
 
 #### Commands:
 
-1. **Install dependencies**:  
-   \`\`\`bash
+1. **Install Flutter**: Follow the instructions from the [Flutter installation guide](https://flutter.dev/docs/get-started/install).
+
+2. **Run the app**:
+
+   a. **Install dependencies**:  
+   ```bash
    cd mobile-apps
-   npm install
-   \`\`\`
+   flutter pub get
+   ```
 
-2. **Run on iOS**:  
-   \`\`\`bash
-   npm run ios
-   \`\`\`
+   b. **Run on iOS**:  
+   ```bash
+   flutter run -d ios
+   ```
 
-3. **Run on Android**:  
-   \`\`\`bash
-   npm run android
-   \`\`\`
+   c. **Run on Android**:  
+   ```bash
+   flutter run -d android
+   ```
 
 ---
 
@@ -151,14 +155,14 @@ The mobile applications are built using **React Native**, ensuring compatibility
 - Node.js
 - Python & Django
 - PostgreSQL (or other supported databases)
-- React Native environment setup (Xcode, Android Studio)
+- Flutter environment setup (Xcode, Android Studio)
 
 ### Setup:
 1. Clone the repository:
-   \`\`\`bash
+   ```bash
    git clone https://github.com/username/document-opinion-request.git
    cd document-opinion-request
-   \`\`\`
+   ```
 
 2. Follow the setup instructions for [Web Frontend](#web-frontend), [Backend](#backend), and [Mobile Apps](#mobile-apps).
 
