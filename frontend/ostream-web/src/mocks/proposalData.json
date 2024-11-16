@@ -1,0 +1,76 @@
+{
+  "proposalId": "PROP-2024-001",
+  "title": "Smart City Transportation Integration Project",
+  "summary": {
+    "executiveSummary": "Implementation of an integrated smart transportation system across major city districts",
+    "projectCost": 15000000,
+    "estimatedDuration": "24 months",
+    "riskLevel": "Medium",
+    "sustainabilityScore": 85,
+    "energyEfficiencyRating": "A",
+    "expectedROI": "22%"
+  },
+  "departments": {
+    "primary": "Transportation",
+    "related": [
+      {
+        "name": "Energy",
+        "involvement": "High",
+        "role": "Power infrastructure and sustainability"
+      },
+      {
+        "name": "Urban Planning",
+        "involvement": "Medium",
+        "role": "City integration and space allocation"
+      },
+      {
+        "name": "Environmental",
+        "involvement": "High",
+        "role": "Environmental impact assessment"
+      }
+    ]
+  },
+  "charts": {
+    "budgetAllocation": [
+      { "category": "Infrastructure", "amount": 7500000 },
+      { "category": "Technology", "amount": 4500000 },
+      { "category": "Operations", "amount": 2000000 },
+      { "category": "Consulting", "amount": 1000000 }
+    ],
+    "environmentalImpact": [
+      { "metric": "CO2 Reduction", "current": 1000, "projected": 400 },
+      { "metric": "Energy Usage", "current": 800, "projected": 500 },
+      { "metric": "Noise Pollution", "current": 75, "projected": 45 }
+    ],
+    "implementationTimeline": [
+      { "phase": "Planning", "duration": 4, "progress": 100 },
+      { "phase": "Infrastructure", "duration": 12, "progress": 0 },
+      { "phase": "Technology Integration", "duration": 6, "progress": 0 },
+      { "phase": "Testing", "duration": 2, "progress": 0 }
+    ]
+  },
+  "recommendations": [
+    {
+      "id": 1,
+      "title": "Phase-wise Implementation",
+      "description": "Implement the system in three phases starting with high-traffic areas",
+      "priority": "High",
+      "estimatedImpact": "Reduces implementation risks by 40%",
+      "requiredResources": "Additional project management team"
+    },
+    {
+      "id": 2,
+      "title": "Green Energy Integration",
+      "description": "Utilize solar panels for all station operations",
+      "priority": "Medium",
+      "estimatedImpact": "30% reduction in operational costs",
+      "requiredResources": "Solar infrastructure partnership"
+    }
+  ],
+  "keyMetrics": {
+    "technicalFeasibility": 85,
+    "communityImpact": 90,
+    "environmentalBenefit": 88,
+    "economicViability": 82
+  }
+} 

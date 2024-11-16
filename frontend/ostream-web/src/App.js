@@ -1,14 +1,68 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import AppRoutes from './routes/AppRoutes';
-import { Box } from '@mui/material';
+import Layout from './components/layout/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
+import Login from './pages/Login';
+import Home from './pages/Home';
+import Documents from './pages/Documents';
+import Tasks from './pages/Tasks';
+import Notifications from './pages/Notifications';
+import Unauthorized from './components/Unauthorized';
 
 function App() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </Box>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+          
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Home />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/documents"
+            element={
+              <ProtectedRoute requiredPermissions={['view_documents']}>
+                <Layout>
+                  <Documents />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/tasks"
+            element={
+              <ProtectedRoute requiredPermissions={['view_tasks']}>
+                <Layout>
+                  <Tasks />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Notifications />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

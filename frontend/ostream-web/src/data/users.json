@@ -1,0 +1,66 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "username": "admin",
+      "password": "admin123",
+      "role": "superadmin",
+      "department": null,
+      "permissions": [
+        "view_documents",
+        "edit_documents",
+        "delete_documents",
+        "share_documents",
+        "view_tasks",
+        "edit_tasks",
+        "view_all",
+        "edit_all",
+        "delete_all",
+        "share_all"
+      ]
+    },
+    {
+      "id": "2",
+      "username": "finance_manager",
+      "password": "finance123",
+      "role": "manager",
+      "department": "Finance",
+      "permissions": [
+        "view_documents",
+        "edit_documents",
+        "share_documents",
+        "view_tasks",
+        "edit_tasks",
+        "view_department",
+        "edit_department",
+        "share_department"
+      ]
+    },
+    {
+      "id": "3",
+      "username": "hr_user",
+      "password": "hr123",
+      "role": "user",
+      "department": "HR",
+      "permissions": [
+        "view_documents",
+        "edit_own",
+        "view_tasks",
+        "view_department"
+      ]
+    },
+    {
+      "id": "4",
+      "username": "it_user",
+      "password": "it123",
+      "role": "user",
+      "department": "IT",
+      "permissions": [
+        "view_documents",
+        "edit_own",
+        "view_tasks",
+        "view_department"
+      ]
+    }
+  ]
+} 

@@ -1,72 +1,118 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
-import logo from '../assets/logo.png';
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  Paper,
+} from '@mui/material';
+import logo from '../assets/logo.png'; // Import the logo
 
 function Login() {
-  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+  });
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login({ email: credentials.email });
-    navigate('/');
+    setError('');
+
+    try {
+      const success = login(formData.username, formData.password);
+      if (success) {
+        navigate('/documents');
+      } else {
+        setError('Invalid username or password');
+      }
+    } catch (err) {
+      setError('An error occurred during login');
+    }
   };
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ 
-        mt: 8, 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center' 
-      }}>
-        <img 
-          src={logo}
-          alt="Logo" 
-          style={{ 
-            width: 75, 
-            height: 100, 
-            marginBottom: 16 
-          }} 
-        />
-        <Typography variant="h4" component="h1" gutterBottom>
-          OStream
-        </Typography>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Login
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Email Address"
-            autoComplete="email"
-            autoFocus
-            value={credentials.email}
-            onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
+      <Box
+        sx={{
+          mt: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        {/* Logo Section */}
+        <Box sx={{ mb: 4, textAlign: 'center' }}>
+          <img
+            src={logo}
+            alt="OStream Logo"
+            style={{
+              height: '80px',
+              width: 'auto',
+              marginBottom: '16px'
+            }}
           />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            label="Password"
-            type="password"
-            value={credentials.password}
-            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-          >
-            Sign In
-          </Button>
+          <Typography variant="h4" component="h1" gutterBottom>
+            OStream
+          </Typography>
         </Box>
+
+        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
+          <Typography variant="h5" component="h2" gutterBottom align="center">
+            Login
+          </Typography>
+          
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Username"
+              autoFocus
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              label="Password"
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+            >
+              Sign In
+            </Button>
+          </Box>
+
+          <Typography variant="body2" color="text.secondary" align="center">
+            Demo Users:
+          </Typography>
+          <Typography variant="caption" color="text.secondary" align="center" component="div">
+            admin / admin123 (Superadmin)<br />
+            finance_manager / finance123 (Finance Manager)<br />
+            hr_user / hr123 (HR User)<br />
+            it_user / it123 (IT User)
+          </Typography>
+        </Paper>
       </Box>
     </Container>
   );

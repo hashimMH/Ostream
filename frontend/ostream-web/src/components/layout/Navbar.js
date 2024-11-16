@@ -1,88 +1,163 @@
-import { AppBar, Toolbar, Typography, Button, Box, IconButton } from '@mui/material';
-import { useNavigate, Link } from 'react-router-dom';
-import HomeIcon from '@mui/icons-material/Home';
-import DocumentIcon from '@mui/icons-material/Description';
-import TaskIcon from '@mui/icons-material/Assignment';
-import NotificationIcon from '@mui/icons-material/Notifications';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { useState } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import logo from '../../assets/logo.png';
+import useUserPermissions from '../../hooks/useUserPermissions';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  Tabs,
+  Tab,
+} from '@mui/material';
+import {
+  HomeOutlined,
+  DescriptionOutlined,
+  AssignmentOutlined,
+  NotificationsOutlined,
+  LogoutOutlined,
+} from '@mui/icons-material';
+import logo from '../../assets/logo.png'; // Import the logo
 
 function Navbar() {
+  const { currentUser, logout } = useAuth();
+  const { hasPermission } = useUserPermissions();
+  const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
-  const { isAuthenticated, logout } = useAuth();
+  const location = useLocation();
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const handleLogout = () => {
+    handleClose();
     logout();
     navigate('/login');
+  };
+
+  const handleTabChange = (event, newValue) => {
+    navigate(newValue);
+  };
+
+  // Get current tab value from location
+  const getCurrentTab = () => {
+    const path = location.pathname;
+    if (path === '/') return '/';
+    if (path.startsWith('/documents')) return '/documents';
+    if (path.startsWith('/tasks')) return '/tasks';
+    if (path.startsWith('/notifications')) return '/notifications';
+    return false;
   };
 
   return (
     <AppBar position="static">
       <Toolbar>
-        <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-          <img 
+        {/* Logo and Title */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mr: 4 }}>
+          <img
             src={logo}
-            alt="Logo" 
-            style={{ height: 40, marginRight: 10 }}
+            alt="OStream Logo"
+            style={{
+              height: '40px',
+              width: 'auto',
+              marginRight: '12px'
+            }}
           />
           <Typography variant="h6" component="div">
             OStream
           </Typography>
         </Box>
-        {isAuthenticated ? (
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button
-              color="inherit"
-              component={Link}
-              to="/"
-              startIcon={<HomeIcon />}
+
+        {currentUser && (
+          <>
+            <Tabs 
+              value={getCurrentTab()} 
+              onChange={handleTabChange}
+              textColor="inherit"
+              indicatorColor="secondary"
+              sx={{ flexGrow: 1 }}
             >
-              Home
-            </Button>
-            <Button
-              color="inherit"
-              component={Link}
-              to="/documents"
-              startIcon={<DocumentIcon />}
-            >
-              Documents
-            </Button>
-            <Button
-              color="inherit"
-              component={Link}
-              to="/tasks"
-              startIcon={<TaskIcon />}
-            >
-              Tasks
-            </Button>
-            <Button
-              color="inherit"
-              component={Link}
-              to="/notifications"
-              startIcon={<NotificationIcon />}
-            >
-              Notifications
-            </Button>
-            <Button
-              color="error"
-              variant="contained"
-              onClick={handleLogout}
-              startIcon={<LogoutIcon />}
-              sx={{ ml: 2 }}
-            >
-              Logout
-            </Button>
-          </Box>
-        ) : (
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button color="inherit" onClick={() => navigate('/login')}>
-              Login
-            </Button>
-            <Button color="inherit" onClick={() => navigate('/signup')}>
-              Sign Up
-            </Button>
-          </Box>
+              <Tab 
+                label="Home" 
+                value="/" 
+                icon={<HomeOutlined />} 
+                iconPosition="start"
+              />
+              {hasPermission('view_documents') && (
+                <Tab 
+                  label="Documents" 
+                  value="/documents" 
+                  icon={<DescriptionOutlined />} 
+                  iconPosition="start"
+                />
+              )}
+              {hasPermission('view_tasks') && (
+                <Tab 
+                  label="Tasks" 
+                  value="/tasks" 
+                  icon={<AssignmentOutlined />} 
+                  iconPosition="start"
+                />
+              )}
+              <Tab 
+                label="Notifications" 
+                value="/notifications" 
+                icon={<NotificationsOutlined />} 
+                iconPosition="start"
+              />
+            </Tabs>
+
+            {/* User Menu */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <IconButton
+                onClick={handleMenu}
+                color="inherit"
+              >
+                <Avatar sx={{ width: 32, height: 32 }}>
+                  {currentUser.username[0].toUpperCase()}
+                </Avatar>
+              </IconButton>
+              
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+              >
+                <MenuItem disabled>
+                  <Typography variant="body2">
+                    {currentUser.username}
+                  </Typography>
+                </MenuItem>
+                <MenuItem disabled>
+                  <Typography variant="caption" color="text.secondary">
+                    {currentUser.role} - {currentUser.department || 'All Departments'}
+                  </Typography>
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <LogoutOutlined sx={{ mr: 1 }} fontSize="small" />
+                  Logout
+                </MenuItem>
+              </Menu>
+            </Box>
+          </>
         )}
       </Toolbar>
     </AppBar>
