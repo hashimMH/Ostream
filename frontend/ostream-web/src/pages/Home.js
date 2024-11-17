@@ -44,7 +44,6 @@ function Home() {
     upload: false,
     preview: false,
   });
-
   // Calculate statistics based on user role and department
   const stats = useMemo(() => {
     const userDocs = currentUser.role === 'superadmin'
@@ -199,7 +198,11 @@ function Home() {
               </TableHead>
               <TableBody>
                 {stats.recentActivity.map((doc) => (
-                  <TableRow key={doc.id}>
+                  <TableRow 
+                    key={doc.id} 
+                    onClick={() => navigate('/proposal')}
+                    sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}
+                  >
                     <TableCell>{doc.name}</TableCell>
                     <TableCell>{doc.type}</TableCell>
                     <TableCell>{doc.department}</TableCell>
@@ -217,7 +220,10 @@ function Home() {
                     <TableCell align="right">
                       <IconButton 
                         size="small"
-                        onClick={() => handleModalOpen('preview', doc)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate('/proposal');
+                        }}
                       >
                         <VisibilityOutlined />
                       </IconButton>

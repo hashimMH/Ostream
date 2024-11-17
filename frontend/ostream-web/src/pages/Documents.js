@@ -20,6 +20,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  TablePagination,
 } from '@mui/material';
 import {
   VisibilityOutlined,
@@ -30,6 +31,9 @@ import {
   CloudUploadOutlined,
   HistoryOutlined,
   Search,
+  CheckCircleOutlined,
+  PendingOutlined,
+  DescriptionOutlined,
 } from '@mui/icons-material';
 import EditDocumentModal from '../components/documents/EditDocumentModal';
 import UploadModal from '../components/documents/UploadModal';
@@ -38,10 +42,12 @@ import ShareModal from '../components/documents/ShareModal';
 import CommentsModal from '../components/documents/CommentsModal';
 import AnalysisModal from '../components/documents/AnalysisModal';
 import VersionHistoryModal from '../components/documents/VersionHistoryModal';
+import { useNavigate } from 'react-router-dom';
 
 function Documents() {
   const { documents } = useDocumentStore();
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   
   // Add modal states
   const [selectedDoc, setSelectedDoc] = useState(null);
@@ -60,6 +66,9 @@ function Documents() {
     type: 'all',
     status: 'all'
   });
+
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   // Add modal handlers
   const handleModalOpen = (modalType, document = null) => {
@@ -80,6 +89,15 @@ function Documents() {
     if (modalType === 'upload') {
       setSelectedDoc(null);
     }
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
   };
 
   // Filter documents based on user role and department
@@ -226,41 +244,75 @@ function Documents() {
           </Box>
 
           {/* Documents Table */}
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell>Department</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Last Modified</TableCell>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredDocuments.map((doc) => (
-                  <TableRow key={doc.id}>
-                    <TableCell>{doc.name}</TableCell>
-                    <TableCell>{doc.type}</TableCell>
-                    <TableCell>{doc.department}</TableCell>
-                    <TableCell>{doc.status}</TableCell>
-                    <TableCell>{new Date(doc.lastModified).toLocaleDateString()}</TableCell>
-                    <TableCell align="right">
-                      {renderActionButtons(doc)}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredDocuments.length === 0 && (
+          <Paper>
+            <TableContainer>
+              <Table>
+                <TableHead>
                   <TableRow>
-                    <TableCell colSpan={6} align="center">
-                      No documents found
-                    </TableCell>
+                    <TableCell>Document Name</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell>Department</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Last Modified</TableCell>
+                    <TableCell align="right">Actions</TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {filteredDocuments
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((doc) => (
+                      <TableRow 
+                        key={doc.id} 
+                        onClick={() => navigate('/proposal')}
+                        sx={{ cursor: 'pointer' }}
+                      >
+                        <TableCell>{doc.name}</TableCell>
+                        <TableCell>{doc.type}</TableCell>
+                        <TableCell>{doc.department}</TableCell>
+                        <TableCell>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {doc.status === 'approved' && <CheckCircleOutlined color="success" sx={{ mr: 1 }} />}
+                            {doc.status === 'in_review' && <PendingOutlined color="warning" sx={{ mr: 1 }} />}
+                            {doc.status === 'draft' && <DescriptionOutlined color="info" sx={{ mr: 1 }} />}
+                            {doc.status}
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          {new Date(doc.lastModified).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell align="right">
+                          <IconButton 
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate('/proposal');
+                            }}
+                          >
+                            <VisibilityOutlined />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  {filteredDocuments.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={6} align="center">
+                        No documents found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={filteredDocuments.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </Paper>
         </Box>
       </Container>
 

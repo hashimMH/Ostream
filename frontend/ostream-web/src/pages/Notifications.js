@@ -1,38 +1,105 @@
 import { useState } from 'react';
-import {
-  Container, Typography, Paper, Box, List, ListItem,
-  ListItemText, IconButton, Chip, Divider
-} from '@mui/material';
-import { Delete as DeleteIcon, Done as DoneIcon } from '@mui/icons-material';
+import { useAuth } from '../context/AuthContext';
 import useNotificationStore from '../store/notificationStore';
-import useAuthStore from '../store/authStore';
+import {
+  Container,
+  Box,
+  Paper,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Chip,
+  Divider,
+} from '@mui/material';
+import {
+  Delete as DeleteIcon,
+  Done as DoneIcon,
+  Description,
+  Share,
+  Comment,
+  Update,
+} from '@mui/icons-material';
 
 function Notifications() {
+  const { currentUser } = useAuth();
   const { notifications, markAsRead, deleteNotification } = useNotificationStore();
-  const userDepartment = useAuthStore(state => state.user?.department);
-  
-  const filteredNotifications = notifications.filter(
-    n => n.department === userDepartment
-  );
+
+  // Demo notifications data
+  const demoNotifications = [
+    {
+      id: Date.now() - 1000,
+      title: "New Document Shared",
+      message: "Transportation Department has shared 'Q1 Infrastructure Report' with your department",
+      type: "share",
+      read: false,
+      department: currentUser.department
+    },
+    {
+      id: Date.now() - 2000,
+      title: "Document Status Update",
+      message: "Your document 'City Planning 2024' has been approved",
+      type: "status",
+      read: false,
+      department: currentUser.department
+    },
+    {
+      id: Date.now() - 3000,
+      title: "New Comment",
+      message: "John Doe commented on 'Environmental Impact Assessment'",
+      type: "comment",
+      read: true,
+      department: currentUser.department
+    },
+    {
+      id: Date.now() - 4000,
+      title: "Document Updated",
+      message: "Urban Development team updated 'Smart City Proposal v2'",
+      type: "update",
+      read: false,
+      department: currentUser.department
+    }
+  ];
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'share':
+        return <Share color="primary" />;
+      case 'status':
+        return <Description color="success" />;
+      case 'comment':
+        return <Comment color="info" />;
+      case 'update':
+        return <Update color="warning" />;
+      default:
+        return <Description />;
+    }
+  };
 
   return (
     <Container maxWidth="lg">
       <Box sx={{ mt: 4 }}>
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
+          <Typography variant="h4" gutterBottom>
             Notifications
           </Typography>
           
           <List>
-            {filteredNotifications.map((notification) => (
+            {demoNotifications.map((notification) => (
               <Box key={notification.id}>
                 <ListItem
+                  sx={{
+                    bgcolor: notification.read ? 'transparent' : 'action.hover',
+                    borderRadius: 1,
+                  }}
                   secondaryAction={
                     <>
                       {!notification.read && (
                         <IconButton 
                           edge="end" 
                           onClick={() => markAsRead(notification.id)}
+                          sx={{ mr: 1 }}
                         >
                           <DoneIcon />
                         </IconButton>
@@ -46,8 +113,22 @@ function Notifications() {
                     </>
                   }
                 >
+                  <Box sx={{ mr: 2 }}>
+                    {getNotificationIcon(notification.type)}
+                  </Box>
                   <ListItemText
-                    primary={notification.title}
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {notification.title}
+                        {!notification.read && (
+                          <Chip 
+                            label="New" 
+                            color="primary" 
+                            size="small" 
+                          />
+                        )}
+                      </Box>
+                    }
                     secondary={
                       <>
                         <Typography variant="body2">
@@ -59,16 +140,8 @@ function Notifications() {
                       </>
                     }
                   />
-                  {!notification.read && (
-                    <Chip 
-                      label="New" 
-                      color="primary" 
-                      size="small" 
-                      sx={{ ml: 1 }} 
-                    />
-                  )}
                 </ListItem>
-                <Divider />
+                <Divider sx={{ my: 1 }} />
               </Box>
             ))}
           </List>

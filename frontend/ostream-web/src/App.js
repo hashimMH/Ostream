@@ -8,6 +8,8 @@ import Documents from './pages/Documents';
 import Tasks from './pages/Tasks';
 import Notifications from './pages/Notifications';
 import Unauthorized from './components/Unauthorized';
+import ProposalDashboard from './pages/ProposalDashboard';
+
 
 function App() {
   return (
@@ -27,7 +29,18 @@ function App() {
               </ProtectedRoute>
             }
           />
-          
+
+          <Route
+            path="/proposal"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ProposalDashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/documents"
             element={

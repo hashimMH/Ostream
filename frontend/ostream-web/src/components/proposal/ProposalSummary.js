@@ -16,6 +16,23 @@ function ProposalSummary({ summary }) {
         {summary.executiveSummary}
       </Typography>
 
+      <Box sx={{ mb: 2 }}>
+        <Chip
+          label={`Status: ${summary.status || 'In Review'}`}
+          color={
+            summary.status === 'approved' ? 'success' :
+            summary.status === 'rejected' ? 'error' :
+            'warning'
+          }
+          sx={{ mr: 1 }}
+        />
+        {summary.status === 'rejected' && summary.rejectionReason && (
+          <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+            Rejection Reason: {summary.rejectionReason}
+          </Typography>
+        )}
+      </Box>
+
       <Grid container spacing={2}>
         {metrics.map((metric, index) => (
           <Grid item xs={6} key={index}>
