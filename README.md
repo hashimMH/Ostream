@@ -112,9 +112,7 @@ The backend is a **Django** application for handling API requests and managing d
 5. **Environment variables**:  
    Create a `.env` file in the `backend` folder with the following structure:
    ```
-   SECRET_KEY=your_django_secret_key
-   DATABASE_URL=postgres://user:password@localhost:5432/project_db
-   DEBUG=True
+   API_KEY=your_secret_key
    ```
 
 ---
