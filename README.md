@@ -101,10 +101,15 @@ The backend is a **Django** application for handling API requests and managing d
 
 3. **Run development server**:  
    ```bash
-   python manage.py runserver
+   uvicorn main:app --reload
    ```
 
-4. **Environment variables**:  
+4. **Run chat server**:  
+   ```bash
+   uvicorn chat:app --host 127.0.0.1 --port 8001 --reload
+   ```
+
+5. **Environment variables**:  
    Create a `.env` file in the `backend` folder with the following structure:
    ```
    SECRET_KEY=your_django_secret_key
