@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLocation } from 'react-router-dom';
 import { 
   Container, 
   Grid, 
@@ -25,9 +26,12 @@ import ProposalRecommendations from '../components/proposal/ProposalRecommendati
 import RelatedDepartments from '../components/proposal/RelatedDepartments';
 import ProposalComments from '../components/proposal/ProposalComments';
 import RejectionModal from '../components/proposal/RejectionModal';
+import PreviewModal from '../components/documents/PreviewModal';
 
 function ProposalDashboard() {
   const { currentUser } = useAuth();
+  const location = useLocation();
+  const document = location.state?.document;
   const [proposalData, setProposalData] = useState({
     summary: {
       projectCost: 15000000,
@@ -101,6 +105,8 @@ function ProposalDashboard() {
 
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [proposalStatus, setProposalStatus] = useState('in_review');
+  const [showPreview, setShowPreview] = useState(false);
+
 
   const handleAddComment = (newComment) => {
     setProposalData(prev => ({
@@ -162,86 +168,106 @@ function ProposalDashboard() {
   };
 
   return (
-    <Container maxWidth="xl">
-      <Box sx={{ mt: 4, mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-          <Typography variant="h4">
-            Smart City Transportation Proposal
-          </Typography>
-          <Box>
-            <Button
-              variant="contained"
-              color="success"
-              onClick={handleApprove}
-              disabled={proposalStatus === 'approved' || proposalStatus === 'rejected'}
-              sx={{ mr: 1 }}
-            >
-              Approve
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => setRejectModalOpen(true)}
-              disabled={proposalStatus === 'approved' || proposalStatus === 'rejected'}
-              sx={{ mr: 2 }}
-            >
-              Reject
-            </Button>
-            <IconButton title="Share">
-              <ShareOutlined />
-            </IconButton>
-            <IconButton title="Edit">
-              <EditOutlined />
-            </IconButton>
-            <Button
-              variant="contained"
-              startIcon={<CloudUploadOutlined />}
-              sx={{ ml: 2 }}
-            >
-              Export Report
-            </Button>
+    <>
+      <Container maxWidth="xl">
+        <Box sx={{ mt: 4, mb: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+            <Typography variant="h4">
+              Smart City Transportation Proposal
+            </Typography>
+            <Box>
+              {document && (
+                <Button
+                  variant="outlined"
+                  startIcon={<VisibilityOutlined />}
+                  onClick={() => setShowPreview(true)}
+                  sx={{ mr: 2 }}
+                >
+                  Preview Document
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleApprove}
+                disabled={proposalStatus === 'approved' || proposalStatus === 'rejected'}
+                sx={{ mr: 1 }}
+              >
+                Approve
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => setRejectModalOpen(true)}
+                disabled={proposalStatus === 'approved' || proposalStatus === 'rejected'}
+                sx={{ mr: 2 }}
+              >
+                Reject
+              </Button>
+              <IconButton title="Share">
+                <ShareOutlined />
+              </IconButton>
+              <IconButton title="Edit">
+                <EditOutlined />
+              </IconButton>
+              <Button
+                variant="contained"
+                startIcon={<CloudUploadOutlined />}
+                sx={{ ml: 2 }}
+              >
+                Export Report
+              </Button>
+            </Box>
           </Box>
+          <Divider sx={{ mb: 4 }} />
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <ProposalSummary summary={proposalData.summary} />
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
+              <RelatedDepartments departments={proposalData.departments} />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Paper sx={{ p: 3, mb: 3 }}>
+                <Typography variant="h5" gutterBottom>
+                  Project Analytics
+                </Typography>
+                <ProposalCharts charts={proposalData.charts} />
+              </Paper>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <ProposalRecommendations recommendations={proposalData.recommendations} />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <ProposalComments
+                comments={proposalData.comments}
+                onAddComment={handleAddComment}
+                onEditComment={handleEditComment}
+                onDeleteComment={handleDeleteComment}
+              />
+            </Grid>
+          </Grid>
+          <RejectionModal
+            open={rejectModalOpen}
+            onClose={() => setRejectModalOpen(false)}
+            onReject={handleReject}
+          />
         </Box>
-        <Divider sx={{ mb: 4 }} />
-        
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <ProposalSummary summary={proposalData.summary} />
-          </Grid>
-          
-          <Grid item xs={12} md={6}>
-            <RelatedDepartments departments={proposalData.departments} />
-          </Grid>
-          
-          <Grid item xs={12}>
-            <Paper sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h5" gutterBottom>
-                Project Analytics
-              </Typography>
-              <ProposalCharts charts={proposalData.charts} />
-            </Paper>
-          </Grid>
-          
-          <Grid item xs={12}>
-            <ProposalRecommendations recommendations={proposalData.recommendations} />
-          </Grid>
-          
-          <Grid item xs={12}>
-            <ProposalComments
-              comments={proposalData.comments}
-              onAddComment={handleAddComment}
-              onEditComment={handleEditComment}
-              onDeleteComment={handleDeleteComment}
-            />
-          </Grid>
-        </Grid>
-        <RejectionModal
-          open={rejectModalOpen}
-          onClose={() => setRejectModalOpen(false)}
-          onReject={handleReject}
+      </Container>
+
+      {(document && showPreview) && (
+        <PreviewModal
+          open={showPreview}
+          onClose={() => setShowPreview(false)}
+          document={document}
         />
-      </Box>
-    </Container>
+      )}
+    </>
   );
 }
 

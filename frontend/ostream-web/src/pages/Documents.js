@@ -263,7 +263,7 @@ function Documents() {
                     .map((doc) => (
                       <TableRow 
                         key={doc.id} 
-                        onClick={() => navigate('/proposal')}
+                        onClick={() => navigate('/proposal', { state: { document: doc } })}
                         sx={{ cursor: 'pointer' }}
                       >
                         <TableCell>{doc.name}</TableCell>
@@ -285,7 +285,7 @@ function Documents() {
                             size="small"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate('/proposal');
+                              navigate('/proposal', { state: { document: doc } });
                             }}
                           >
                             <VisibilityOutlined />

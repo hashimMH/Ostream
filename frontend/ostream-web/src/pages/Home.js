@@ -200,7 +200,7 @@ function Home() {
                 {stats.recentActivity.map((doc) => (
                   <TableRow 
                     key={doc.id} 
-                    onClick={() => navigate('/proposal')}
+                    onClick={() => navigate('/proposal', { state: { document: doc } })}
                     sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}
                   >
                     <TableCell>{doc.name}</TableCell>
@@ -222,7 +222,7 @@ function Home() {
                         size="small"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate('/proposal');
+                          navigate('/proposal', { state: { document: doc } });
                         }}
                       >
                         <VisibilityOutlined />
