@@ -1,22 +1,29 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from typing import Dict, List, Union, Any
+from typing import Dict, List, Union, Any, Optional
 from pydantic import BaseModel
 import fitz  # PyMuPDF
 import logging
 from io import BytesIO
-import openai
+from openai import OpenAI
 import json
 from fastapi.middleware.cors import CORSMiddleware
 import uuid
-from decouple import config
 import os
+from dotenv import load_dotenv
+from openai import AsyncOpenAI  # Update this import
+from datetime import datetime, timedelta
+import base64
+
+# Load environment variables
+load_dotenv()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load OpenAI API key from .env
-openai.api_key = config("OPENAI_API_KEY")
+# OpenAI API key
+OpenAI.api_key = os.getenv("OPENAI_API_KEY")
+print(OpenAI.api_key)
 
 app = FastAPI(title="Document Analysis API")
 
@@ -94,6 +101,19 @@ class SummaryData(BaseModel):
     energyEfficiencyRating: str
     expectedROI: str
 
+class SimilarProject(BaseModel):
+    projectId: str
+    title: str
+    completionStatus: str  # 'Completed', 'In Progress', 'Cancelled'
+    successRate: int
+    actualCost: float
+    plannedCost: float
+    leadDepartment: str
+    completionDate: str
+    keyLessonsLearned: List[str]
+    challenges: List[str]
+    successFactors: List[str]
+
 class ProjectResponse(BaseModel):
     title: str
     summary: SummaryData
@@ -102,8 +122,121 @@ class ProjectResponse(BaseModel):
     relatedDepartments: List[RelatedDepartment]
     trends: List[Trend]
     keyMetrics: KeyMetrics
+    similarProjects: List[SimilarProject]
 
 # OpenAI API key
+
+# Add this mock database before the extract_text_from_pdf function
+MOCK_PROJECTS_DB = {
+    "PRJ001": {
+        "projectId": "PRJ001",
+        "title": "Smart City Infrastructure Enhancement",
+        "completionStatus": "Completed",
+        "successRate": 95,
+        "actualCost": 15000000,
+        "plannedCost": 14000000,
+        "leadDepartment": "Abu Dhabi Digital Authority",
+        "completionDate": "2023-12-15",
+        "keyLessonsLearned": [
+            "Early stakeholder engagement crucial",
+            "Phased implementation reduced risks",
+            "Regular feedback loops improved outcomes"
+        ],
+        "challenges": [
+            "Initial resistance to digital transformation",
+            "Integration with legacy systems",
+            "Training requirements underestimated"
+        ],
+        "successFactors": [
+            "Strong executive sponsorship",
+            "Comprehensive change management",
+            "Effective vendor partnerships"
+        ]
+    },
+    "PRJ002": {
+        "projectId": "PRJ002",
+        "title": "Sustainable Energy Initiative",
+        "completionStatus": "Completed",
+        "successRate": 88,
+        "actualCost": 25000000,
+        "plannedCost": 23000000,
+        "leadDepartment": "Department of Energy",
+        "completionDate": "2023-09-30",
+        "keyLessonsLearned": [
+            "Environmental impact assessments critical",
+            "Community engagement improved acceptance",
+            "Technology selection crucial for success"
+        ],
+        "challenges": [
+            "Weather-related delays",
+            "Supply chain disruptions",
+            "Technical expertise gaps"
+        ],
+        "successFactors": [
+            "Strong project governance",
+            "Effective risk management",
+            "Regular stakeholder communication"
+        ]
+    }
+}
+
+# Add this near the top with other mock databases
+MOCK_PDF_DB = {}  # Will store PDF files with analysis_id as key
+
+class MockDatabase:
+    def __init__(self):
+        self.analyses = {}
+        self.documents = {}  # This will now store PDF metadata instead of content
+    
+    async def save_analysis(self, analysis_id: str, analysis_data: dict, pdf_file: bytes):
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        # Store analysis data
+        self.analyses[analysis_id] = {
+            current_date: analysis_data
+        }
+        
+        # Store PDF in the PDF database
+        MOCK_PDF_DB[analysis_id] = pdf_file
+        
+        # Store PDF metadata
+        self.documents[analysis_id] = {
+            "file_size": len(pdf_file),
+            "upload_date": current_date,
+            "file_name": f"document_{analysis_id}.pdf"
+        }
+    
+    async def get_document(self, analysis_id: str) -> Optional[bytes]:
+        return MOCK_PDF_DB.get(analysis_id)
+    
+    async def get_all_analyses(self) -> Dict[str, Any]:
+        analyses_list = {}
+        for aid, data in self.analyses.items():
+            if data:
+                first_date = list(data.keys())[0]
+                analysis_data = data[first_date]
+                pdf_content = MOCK_PDF_DB.get(aid)
+                
+                analyses_list[str(aid)] = {
+                    "analysis": analysis_data,
+                    "document": {
+                        "content": base64.b64encode(pdf_content).decode('utf-8') if pdf_content else None,  # Convert to base64
+                        "metadata": self.documents.get(aid, {})
+                    }
+                }
+        
+        return {
+            "total": len(analyses_list),
+            "analyses": analyses_list
+        }
+
+# Initialize mock database
+db = MockDatabase()
+
+# Add a helper function to find similar projects
+def find_similar_projects(analysis_content: dict) -> List[dict]:
+    # This is a simple implementation - you might want to make it more sophisticated
+    # based on department, cost range, project type, etc.
+    return list(MOCK_PROJECTS_DB.values())[:2]  # Returns top 2 similar projects
 
 def extract_text_from_pdf(file_content: bytes) -> str:
     try:
@@ -116,6 +249,8 @@ def extract_text_from_pdf(file_content: bytes) -> str:
         logger.error(f"Error extracting text from PDF: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to extract text from PDF")
 
+# Initialize the client
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 async def analyze_document_content(text: str) -> dict:
     prompt = """
@@ -157,7 +292,7 @@ async def analyze_document_content(text: str) -> dict:
                 "executiveSummary": "Comprehensive analysis...",
                 "projectCost": number (in AED),
                 "estimatedDuration": "X years Y months",
-                "riskLevel": "Low/Medium/High with specific reasons",
+                "riskLevel": "Low/Medium/High ",
                 "sustainabilityScore": number (0-100),
                 "energyEfficiencyRating": "Specific rating (A+ to F) with justification",
                 "expectedROI": "X% over Y years"
@@ -195,7 +330,7 @@ async def analyze_document_content(text: str) -> dict:
             },
             "relatedDepartments": [
                 {
-                    "name": "Specific Abu Dhabi department name from the list above",
+                    "name": "Specific Abu Dhabi department name OR Internal Executive Office department name",
                     "involvement": "High/Medium/Low",
                     "role": "Specific responsibilities",
                     "impact": "How this department's involvement affects project success",
@@ -225,7 +360,22 @@ async def analyze_document_content(text: str) -> dict:
                         "mitigationStatus": number (0-100)
                     }
                 ]
-            }
+            },
+            "similarProjects": [
+                {
+                    "projectId": "Unique project ID",
+                    "title": "Project title",
+                    "completionStatus": "Completed/In Progress/Cancelled",
+                    "successRate": number (0-100),
+                    "actualCost": number (in AED),
+                    "plannedCost": number (in AED),
+                    "leadDepartment": "Department name",
+                    "completionDate": "YYYY-MM-DD",
+                    "keyLessonsLearned": ["Lesson 1", "Lesson 2"],
+                    "challenges": ["Challenge 1", "Challenge 2"],
+                    "successFactors": ["Factor 1", "Factor 2"]
+                }
+            ]
         }
     }
 
@@ -259,7 +409,7 @@ async def analyze_document_content(text: str) -> dict:
     """
 
     try:
-        response = await openai.ChatCompletion.acreate(
+        response = await client.chat.completions.create(
             model=os.getenv("OPENAI_MODEL", "gpt-4"),
             messages=[
                 {
@@ -296,35 +446,88 @@ async def analyze_document_content(text: str) -> dict:
         logger.error(f"OpenAI API Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to analyze document")
 
-# Store analysis results in memory (in production, use a proper database)
-analysis_results = {}
-
+# Update upload endpoint to handle PDF properly
 @app.post("/api/upload", response_model=Dict[str, str])
 async def upload_document(file: UploadFile = File(...)):
     try:
-        # Generate unique ID for this analysis
-        analysis_id = str(uuid.uuid4())
+        # Generate new ID
+        existing_ids = [int(k) for k in db.analyses.keys()] if db.analyses else [0]
+        new_id = str(max(existing_ids) + 1)
         
         file_content = await file.read()
-        text = extract_text_from_pdf(file_content)
-        analysis = await analyze_document_content(text)
         
-        # Store the analysis result
-        analysis_results[analysis_id] = analysis
+        # Process the document
+        text = extract_text_from_pdf(file_content)
+        analysis_result = await analyze_document_content(text)
+        
+        # Store analysis and PDF
+        await db.save_analysis(new_id, analysis_result, file_content)
         
         return {
-            "status": "success",
-            "message": "Document analyzed successfully",
-            "analysis_id": analysis_id
+            "message": "Document uploaded and analyzed successfully",
+            "analysis_id": new_id
         }
         
     except Exception as e:
-        logger.error(f"Error processing document: {str(e)}")
+        logger.error(f"Upload error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/analysis/{analysis_id}", response_model=Dict[str, ProjectResponse])
+# Update get analysis endpoint to return PDF properly
+@app.get("/api/analysis/{analysis_id}")
 async def get_analysis(analysis_id: str):
-    if analysis_id not in analysis_results:
+    analysis = await db.get_analysis(analysis_id)
+    if not analysis:
         raise HTTPException(status_code=404, detail="Analysis not found")
     
-    return analysis_results[analysis_id]
+    pdf_content = await db.get_document(analysis_id)
+    
+    first_date = list(analysis.keys())[0]
+    return {
+        "analysis": analysis[first_date],
+        "document": {
+            "content": base64.b64encode(pdf_content).decode('utf-8') if pdf_content else None,  # Convert to base64
+            "metadata": db.documents.get(analysis_id, {})
+        }
+    }
+
+# Optional: Add a new endpoint to get just the PDF file
+@app.get("/api/analysis/{analysis_id}/pdf")
+async def get_pdf(analysis_id: str):
+    pdf_content = await db.get_document(analysis_id)
+    if not pdf_content:
+        raise HTTPException(status_code=404, detail="PDF not found")
+    
+    return Response(
+        content=pdf_content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=document_{analysis_id}.pdf"
+        }
+    )
+
+# New endpoint to list all analyses
+@app.get("/api/analyses")
+async def list_analyses():
+    analyses = await db.get_all_analyses()
+    return {
+        "total": len(analyses),
+        "analyses": analyses
+    }
+
+# New endpoint to get analysis metadata
+@app.get("/api/analysis/{analysis_id}/metadata")
+async def get_analysis_metadata(analysis_id: str):
+    analysis = await db.get_analysis(analysis_id)
+    if not analysis:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    
+    # Extract title from the first date key in the analysis
+    first_date = list(analysis.keys())[0]
+    title = analysis[first_date].get("title", "Untitled")
+    
+    return {
+        "analysis_id": analysis_id,
+        "title": title,
+        "created_at": datetime.now().isoformat(),  # or store actual creation time
+        "file_name": f"document_{analysis_id[:8]}.pdf"
+    }
