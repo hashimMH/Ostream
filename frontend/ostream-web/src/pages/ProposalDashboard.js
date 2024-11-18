@@ -12,6 +12,7 @@ import {
   CardContent,
   IconButton,
   Button,
+  Fab,
 } from '@mui/material';
 import {
   VisibilityOutlined,
@@ -19,6 +20,7 @@ import {
   ShareOutlined,
   EditOutlined,
   CloudUploadOutlined,
+  Chat,
 } from '@mui/icons-material';
 import ProposalSummary from '../components/proposal/ProposalSummary';
 import ProposalCharts from '../components/proposal/ProposalCharts';
@@ -27,86 +29,25 @@ import RelatedDepartments from '../components/proposal/RelatedDepartments';
 import ProposalComments from '../components/proposal/ProposalComments';
 import RejectionModal from '../components/proposal/RejectionModal';
 import PreviewModal from '../components/documents/PreviewModal';
+import ChatWithPDFModal from '../components/proposal/ChatWithPDFModal';
 
 function ProposalDashboard() {
   const { currentUser } = useAuth();
   const location = useLocation();
   const document = location.state?.document;
   const [proposalData, setProposalData] = useState({
-    summary: {
-      projectCost: 15000000,
-      estimatedDuration: "24 months",
-      riskLevel: "Medium",
-      expectedROI: "35%",
-      executiveSummary: "Implementation of an integrated smart transportation system across major city districts",
-      sustainabilityScore: 85,
-      energyEfficiencyRating: "A"
-    },
-    departments: {
-      primary: "Urban Development",
-      related: [
-        { name: "Transportation", role: "Infrastructure Planning", involvement: "High" },
-        { name: "Technology", role: "System Integration", involvement: "High" },
-        { name: "Environment", role: "Impact Assessment", involvement: "Medium" }
-      ]
-    },
-    charts: {
-      budgetAllocation: [
-        { category: "Infrastructure", amount: 7500000 },
-        { category: "Technology", amount: 4500000 },
-        { category: "Operations", amount: 2000000 },
-        { category: "Consulting", amount: 1000000 }
-      ],
-      environmentalImpact: [
-        { name: "CO2 Emissions", current: 100, projected: 45 },
-        { name: "Energy Usage", current: 90, projected: 40 },
-        { name: "Waste", current: 85, projected: 35 }
-      ],
-      implementationTimeline: [
-        { month: "Q1", progress: 25 },
-        { month: "Q2", progress: 45 },
-        { month: "Q3", progress: 75 },
-        { month: "Q4", progress: 100 }
-      ]
-    },
-    recommendations: [
-      {
-        id: 1,
-        title: "Smart Traffic Management",
-        description: "Implement AI-driven traffic management system",
-        priority: "High",
-        estimatedImpact: "40% reduction in congestion"
-      },
-      {
-        id: 2,
-        title: "Green Transportation",
-        description: "Electric vehicle charging infrastructure",
-        priority: "Medium",
-        estimatedImpact: "30% emission reduction"
-      }
-    ],
-    comments: [
-      {
-        id: 1,
-        user: "John Doe",
-        text: "The budget allocation for technology seems appropriate.",
-        timestamp: "2024-03-15T10:30:00Z",
-        edited: false
-      },
-      {
-        id: 2,
-        user: "Jane Smith",
-        text: "We should consider increasing the environmental impact metrics.",
-        timestamp: "2024-03-16T09:15:00Z",
-        edited: true
-      }
-    ]
+    summary: {},
+    departments: { primary: '', related: [] },
+    charts: { budgetAllocation: [], environmentalImpact: [], implementationTimeline: [] },
+    trends: [],
+    keyMetrics: {},
+    similarProjects: []
   });
 
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [proposalStatus, setProposalStatus] = useState('in_review');
   const [showPreview, setShowPreview] = useState(false);
-
+  const [chatModalOpen, setChatModalOpen] = useState(false);
 
   const handleAddComment = (newComment) => {
     setProposalData(prev => ({
@@ -167,13 +108,63 @@ function ProposalDashboard() {
     setRejectModalOpen(false);
   };
 
+  useEffect(() => {
+    if (document) {
+      console.log(JSON.stringify(document));
+      setProposalData({
+        summary: {
+          ...document.summary,
+          status: document.status || 'in_review'
+        },
+        departments: {
+          primary: typeof document.department === 'string' ? document.department : document.department?.primary || '',
+          related: document.relatedDepartments || []
+        },
+        charts: {
+          budgetAllocation: document.chart?.budgetAllocation?.map(item => ({
+            category: item.category,
+            amount: item.amount,
+            percentage: item.percentage,
+            description: item.description
+          })) || [],
+          environmentalImpact: document.chart?.environmentalImpact?.map(item => ({
+            name: item.metric,
+            current: item.current,
+            projected: item.projected,
+            unit: item.unit,
+            improvementPercentage: item.improvementPercentage,
+            description: item.description
+          })) || [],
+          implementationTimeline: document.chart?.implementationTimeline?.map(item => ({
+            phase: item.phase,
+            progress: item.progress,
+            duration: item.duration,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            description: item.description
+          })) || []
+        },
+        trends: document.trends?.map(trend => ({
+          id: trend.name || Math.random().toString(),
+          title: trend.name,
+          description: trend.recommendations,
+          priority: trend.impact,
+          estimatedImpact: `${trend.probability}% probability, ${trend.marketImpact}% market impact`,
+          timeframe: trend.timeframe
+        })) || [],
+        keyMetrics: document.keyMetrics || {},
+        similarProjects: document.similarProjects || []
+      });
+    }
+  }, [document]);
+
   return (
     <>
       <Container maxWidth="xl">
         <Box sx={{ mt: 4, mb: 4 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
             <Typography variant="h4">
-              Smart City Transportation Proposal
+              {document?.title || 'Project Proposal'}
             </Typography>
             <Box>
               {document && (
@@ -227,7 +218,10 @@ function ProposalDashboard() {
             </Grid>
             
             <Grid item xs={12} md={6}>
-              <RelatedDepartments departments={proposalData.departments} />
+              <RelatedDepartments 
+                primary={proposalData.departments.primary}
+                departments={proposalData.departments.related} 
+              />
             </Grid>
             
             <Grid item xs={12}>
@@ -240,17 +234,66 @@ function ProposalDashboard() {
             </Grid>
             
             <Grid item xs={12}>
-              <ProposalRecommendations recommendations={proposalData.recommendations} />
+              <ProposalRecommendations recommendations={proposalData.trends} />
             </Grid>
-            
+
+            {/* Key Metrics Section */}
             <Grid item xs={12}>
-              <ProposalComments
-                comments={proposalData.comments}
-                onAddComment={handleAddComment}
-                onEditComment={handleEditComment}
-                onDeleteComment={handleDeleteComment}
-              />
+              <Paper sx={{ p: 3 }}>
+                <Typography variant="h5" gutterBottom>Key Metrics</Typography>
+                <Grid container spacing={2}>
+                  {Object.entries(proposalData.keyMetrics || {}).map(([key, value]) => {
+                    if (key === 'riskFactors') return null;
+                    return (
+                      <Grid item xs={12} sm={6} md={3} key={key}>
+                        <Box sx={{ p: 2, border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                          <Typography variant="subtitle2" color="text.secondary">
+                            {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                          </Typography>
+                          <Typography variant="h6">
+                            {typeof value === 'number' ? value.toLocaleString() : value || 'N/A'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              </Paper>
             </Grid>
+
+            {/* Similar Projects Section */}
+            {proposalData.similarProjects?.length > 0 && (
+              <Grid item xs={12}>
+                <Paper sx={{ p: 3 }}>
+                  <Typography variant="h5" gutterBottom>Similar Projects</Typography>
+                  <Grid container spacing={2}>
+                    {proposalData.similarProjects.map((project, index) => (
+                      <Grid item xs={12} md={6} key={index}>
+                        <Card>
+                          <CardContent>
+                            <Typography variant="h6">{project.title}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Status: {project.completionStatus}
+                            </Typography>
+                            <Typography variant="body2">
+                              Success Rate: {project.successRate}%
+                            </Typography>
+                            <Typography variant="subtitle2" gutterBottom sx={{ mt: 1 }}>
+                              Key Lessons:
+                            </Typography>
+                            <ul>
+                              {project.keyLessonsLearned?.map((lesson, i) => (
+                                <li key={i}>{lesson}</li>
+                              ))}
+                            </ul>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Paper>
+              </Grid>
+            )}
           </Grid>
           <RejectionModal
             open={rejectModalOpen}
@@ -267,6 +310,24 @@ function ProposalDashboard() {
           document={document}
         />
       )}
+
+      <Fab
+        color="primary"
+        sx={{
+          position: 'fixed',
+          bottom: 16,
+          right: 16,
+        }}
+        onClick={() => setChatModalOpen(true)}
+      >
+        <Chat />
+      </Fab>
+
+      <ChatWithPDFModal
+        open={chatModalOpen}
+        onClose={() => setChatModalOpen(false)}
+        document={document}
+      />
     </>
   );
 }

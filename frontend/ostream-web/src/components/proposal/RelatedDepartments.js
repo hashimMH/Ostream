@@ -1,7 +1,7 @@
 import { Paper, Typography, Box, Avatar, Chip, Grid } from '@mui/material';
 import { Business } from '@mui/icons-material';
 
-function RelatedDepartments({ departments }) {
+function RelatedDepartments({ primary = '', departments = [] }) {
   return (
     <Paper sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom>Related Departments</Typography>
@@ -12,7 +12,7 @@ function RelatedDepartments({ departments }) {
         </Typography>
         <Chip
           icon={<Business />}
-          label={departments.primary}
+          label={primary || 'Not Specified'}
           color="primary"
           size="large"
         />
@@ -22,7 +22,7 @@ function RelatedDepartments({ departments }) {
         Related Departments
       </Typography>
       <Grid container spacing={2}>
-        {departments.related.map((dept, index) => (
+        {departments?.map((dept, index) => (
           <Grid item xs={12} key={index}>
             <Box sx={{ 
               display: 'flex', 
@@ -33,7 +33,7 @@ function RelatedDepartments({ departments }) {
               borderRadius: 1
             }}>
               <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                {dept.name[0]}
+                {dept.name?.[0] || '?'}
               </Avatar>
               <Box>
                 <Typography variant="subtitle2">{dept.name}</Typography>

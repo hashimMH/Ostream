@@ -1,87 +1,63 @@
-import { useState, useEffect } from 'react';
-import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
+import { 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  IconButton, 
   Box,
-  CircularProgress,
+  Typography,
+  Grid,
+  Paper,
+  Button,
 } from '@mui/material';
+import { Close } from '@mui/icons-material';
 
 function PreviewModal({ open, onClose, document }) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
   if (!document) return null;
 
-  // Convert file data to proper format for DocViewer
-  const getDocumentData = (doc) => {
-    try {
-      return [{
-        uri: doc.file,
-        fileType: doc.type.toLowerCase(),
-        fileName: doc.name
-      }];
-    } catch (error) {
-      console.error('Error preparing document:', error);
-      return null;
+  const renderContent = () => {
+    if (document.file) {
+      return (
+        <object
+          data={URL.createObjectURL(document.file)}
+          type="application/pdf"
+          width="100%"
+          height="600px"
+        >
+          <p>
+            PDF cannot be displayed. 
+            <a href={URL.createObjectURL(document.file)} download={document.fileName}>
+              Download instead
+            </a>
+          </p>
+        </object>
+      );
     }
+
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography variant="h6" gutterBottom>{document.title}</Typography>
+        <Typography paragraph>{document.summary?.executiveSummary}</Typography>
+      </Box>
+    );
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
-      maxWidth="md" 
-      fullWidth
-      PaperProps={{
-        sx: { minHeight: '80vh' }
-      }}
-    >
-      <DialogTitle>Document Preview</DialogTitle>
-      <DialogContent>
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h6">{document.name}</Typography>
-          <Typography color="textSecondary">
-            Type: {document.type}
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogTitle>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6">
+            {document.file ? document.fileName : document.title}
           </Typography>
+          <IconButton onClick={onClose}>
+            <Close />
+          </IconButton>
         </Box>
-        
-        <Box sx={{ 
-          bgcolor: 'grey.100', 
-          p: 2, 
-          borderRadius: 1,
-          minHeight: 400,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          overflow: 'auto'
-        }}>
-          <DocViewer
-            documents={getDocumentData(document)}
-            pluginRenderers={DocViewerRenderers}
-            config={{
-              header: {
-                disableHeader: true,
-                disableFileName: true,
-              }
-            }}
-            style={{ width: '100%', height: '500px' }}
-            onError={(e) => {
-              console.error('Preview error:', e);
-              setError('Failed to load document');
-              setLoading(false);
-            }}
-            onLoad={() => setLoading(false)}
-          />
-        </Box>
+      </DialogTitle>
+      <DialogContent>
+        <Paper sx={{ minHeight: '600px' }}>
+          {renderContent()}
+        </Paper>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Close</Button>
-      </DialogActions>
     </Dialog>
   );
 }

@@ -1,7 +1,11 @@
 import { Paper, Typography, Box, Chip, List, ListItem, ListItemText, ListItemIcon } from '@mui/material';
 import { PriorityHigh, TrendingUp } from '@mui/icons-material';
 
-function ProposalRecommendations({ recommendations }) {
+function ProposalRecommendations({ recommendations = [] }) {
+  if (!recommendations || recommendations.length === 0) {
+    return null;
+  }
+
   return (
     <Paper sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom>Recommendations</Typography>

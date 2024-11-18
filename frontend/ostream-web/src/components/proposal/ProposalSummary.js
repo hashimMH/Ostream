@@ -1,19 +1,35 @@
 import { Paper, Typography, Box, Chip, Grid } from '@mui/material';
 import { Assessment, Timer, Warning, TrendingUp } from '@mui/icons-material';
 
-function ProposalSummary({ summary }) {
+function ProposalSummary({ summary = {} }) {
   const metrics = [
-    { icon: <Assessment />, label: 'Project Cost', value: `$${summary.projectCost.toLocaleString()}` },
-    { icon: <Timer />, label: 'Duration', value: summary.estimatedDuration },
-    { icon: <Warning />, label: 'Risk Level', value: summary.riskLevel },
-    { icon: <TrendingUp />, label: 'ROI', value: summary.expectedROI }
+    { 
+      icon: <Assessment />, 
+      label: 'Project Cost', 
+      value: summary.projectCost ? `$${summary.projectCost.toLocaleString()}` : 'N/A'
+    },
+    { 
+      icon: <Timer />, 
+      label: 'Duration', 
+      value: summary.estimatedDuration || 'N/A'
+    },
+    { 
+      icon: <Warning />, 
+      label: 'Risk Level', 
+      value: summary.riskLevel || 'N/A'
+    },
+    { 
+      icon: <TrendingUp />, 
+      label: 'ROI', 
+      value: summary.expectedROI || 'N/A'
+    }
   ];
 
   return (
     <Paper sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom>Project Summary</Typography>
       <Typography variant="body1" paragraph>
-        {summary.executiveSummary}
+        {summary.executiveSummary || 'No summary available'}
       </Typography>
 
       <Box sx={{ mb: 2 }}>

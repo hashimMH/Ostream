@@ -24,6 +24,15 @@ export const documentApi = {
   getVersions: (id) => api.get(`/documents/${id}/versions`),
   share: (id, departments) => api.post(`/documents/${id}/share`, { departments }),
   comment: (id, comment) => api.post(`/documents/${id}/comments`, comment),
+  upload: async (formData) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.post('/api/upload', formData, config);
+  },
+  getAnalyses: () => api.get('/api/analyses'),
 };
 
 export const analyticsApi = {

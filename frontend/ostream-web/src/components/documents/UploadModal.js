@@ -11,9 +11,11 @@ import {
   Select,
   MenuItem,
   Box,
+  CircularProgress,
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import useDocumentStore from '../../store/documentStore';
+import { documentApi } from '../../services/api';
 
 function UploadModal({ open, onClose }) {
   const { currentUser } = useAuth();
@@ -27,6 +29,8 @@ function UploadModal({ open, onClose }) {
     file: null,
     fileName: ''
   });
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -45,31 +49,60 @@ function UploadModal({ open, onClose }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.file) {
       return;
     }
-    
-    const newDocument = {
-      ...formData,
-      id: Date.now(),
-      createdBy: currentUser.id,
-      createdAt: new Date().toISOString(),
-      lastModified: new Date().toISOString(),
-      sharedWith: []
-    };
 
-    addDocument(newDocument);
-    onClose();
-    setFormData({
-      name: '',
-      type: 'PDF',
-      department: currentUser.role === 'superadmin' ? '' : currentUser.department,
-      status: 'draft',
-      file: null,
-      fileName: ''
-    });
+    setIsLoading(true);
+
+    try {
+      const formDataToSend = new FormData();
+      const file = await fetch(formData.file).then(r => r.blob());
+      formDataToSend.append('file', file, formData.fileName);
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('type', formData.type);
+      formDataToSend.append('department', formData.department);
+      formDataToSend.append('status', formData.status);
+
+      const response = await fetch('http://127.0.0.1:8000/api/upload', {
+        method: 'POST',
+        body: formDataToSend,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      
+      const newDocument = {
+        ...formData,
+        id: Date.now(),
+        createdBy: currentUser.id,
+        createdAt: new Date().toISOString(),
+        lastModified: new Date().toISOString(),
+        sharedWith: [],
+        file: result.fileUrl
+      };
+
+      addDocument(newDocument);
+      onClose();
+      setFormData({
+        name: '',
+        type: 'PDF',
+        department: currentUser.role === 'superadmin' ? '' : currentUser.department,
+        status: 'draft',
+        file: null,
+        fileName: ''
+      });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      // Here you might want to show an error message to the user
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -151,9 +184,10 @@ function UploadModal({ open, onClose }) {
           <Button 
             type="submit" 
             variant="contained"
-            disabled={!formData.file}
+            disabled={!formData.file || isLoading}
+            startIcon={isLoading ? <CircularProgress size={20} /> : null}
           >
-            Upload
+            {isLoading ? 'Uploading...' : 'Upload'}
           </Button>
         </DialogActions>
       </form>
