@@ -1,6 +1,0 @@
-framework module babstrap_settings_screen {
-  umbrella header "babstrap_settings_screen-umbrella.h"
-
-  export *
-  module * { export * }
-}
