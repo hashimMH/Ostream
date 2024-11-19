@@ -1,0 +1,13 @@
+com.mr.flutter.plugin.filepicker.file_picker-core-1.6.0-0 /Users/tameem/.gradle/caches/transforms-3/08173f4404cafc9b33933d9dc5d261ec/transformed/core-1.6.0/res
+com.mr.flutter.plugin.filepicker.file_picker-jetified-window-1.0.0-beta04-1 /Users/tameem/.gradle/caches/transforms-3/3e805b88569e13e6fb835c22fe7b8a88/transformed/jetified-window-1.0.0-beta04/res
+com.mr.flutter.plugin.filepicker.file_picker-jetified-window-java-1.0.0-beta04-2 /Users/tameem/.gradle/caches/transforms-3/92cafba5e85775597ac3a7d7e68505bd/transformed/jetified-window-java-1.0.0-beta04/res
+com.mr.flutter.plugin.filepicker.file_picker-jetified-annotation-experimental-1.1.0-3 /Users/tameem/.gradle/caches/transforms-3/9c043cdf90d3ca67b9d376086b498076/transformed/jetified-annotation-experimental-1.1.0/res
+com.mr.flutter.plugin.filepicker.file_picker-main-4 /Users/tameem/.pub-cache/hosted/pub.dev/file_picker-5.5.0/android/src/main/res
+com.mr.flutter.plugin.filepicker.file_picker-release-5 /Users/tameem/.pub-cache/hosted/pub.dev/file_picker-5.5.0/android/src/release/res
+com.mr.flutter.plugin.filepicker.file_picker-pngs-6 /Users/tameem/StudioProjects/ostream/build/file_picker/generated/res/pngs/release
+com.mr.flutter.plugin.filepicker.file_picker-resValues-7 /Users/tameem/StudioProjects/ostream/build/file_picker/generated/res/resValues/release
+com.mr.flutter.plugin.filepicker.file_picker-rs-8 /Users/tameem/StudioProjects/ostream/build/file_picker/generated/res/rs/release
+com.mr.flutter.plugin.filepicker.file_picker-mergeReleaseResources-9 /Users/tameem/StudioProjects/ostream/build/file_picker/intermediates/incremental/release/mergeReleaseResources/merged.dir
+com.mr.flutter.plugin.filepicker.file_picker-mergeReleaseResources-10 /Users/tameem/StudioProjects/ostream/build/file_picker/intermediates/incremental/release/mergeReleaseResources/stripped.dir
+com.mr.flutter.plugin.filepicker.file_picker-merged_res-11 /Users/tameem/StudioProjects/ostream/build/file_picker/intermediates/merged_res/release
+com.mr.flutter.plugin.filepicker.file_picker-packaged_res-12 /Users/tameem/StudioProjects/ostream/build/flutter_plugin_android_lifecycle/intermediates/packaged_res/release
