@@ -81,7 +81,7 @@ import {
 	  <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
 		<DialogTitle>
 		  <Box display="flex" justifyContent="space-between" alignItems="center">
-			<Typography variant="h6">Chat with PDF AI Assistant</Typography>
+			<Typography variant="h6">Chat with Document AI Assistant</Typography>
 			<IconButton onClick={onClose}>
 			  <Close />
 			</IconButton>

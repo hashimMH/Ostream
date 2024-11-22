@@ -5,6 +5,7 @@ import logging
 from io import BytesIO
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
+import os
 
 
 # Load environment variables
@@ -100,7 +101,7 @@ async def chat_with_pdf(pdf_file: UploadFile = Form(...), question: str = Form(.
         
         # Updated OpenAI API call
         messages = [
-            {"role": "system", "content": "You are an assistant who answers questions strictly based on the provided PDF content. Do not add any extra information."},
+            {"role": "system", "content": "You are an assistant who answers questions strictly based on the provided PDF content. add any extra information about the pdf if the user asked . and you can do a presentation about the pdf if you been asked to and puit new line after each line"},
             {"role": "user", "content": f"PDF content: {pdf_text}"},
             {"role": "user", "content": f"Question: {question}"}
         ]

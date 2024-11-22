@@ -2,69 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // Initial dummy data
-const initialDocuments = [
-  {
-    id: 1,
-    name: 'Q4 Financial Report',
-    type: 'PDF',
-    department: 'Finance',
-    status: 'approved',
-    createdAt: '2024-03-10T10:00:00',
-    lastModified: '2024-03-15T10:00:00',
-    createdBy: '2',
-    sharedWith: ['HR'],
-    comments: [
-      {
-        id: 1,
-        text: 'Please review the Q4 projections',
-        userId: '2',
-        username: 'finance_manager',
-        department: 'Finance',
-        timestamp: '2024-03-14T09:00:00'
-      }
-    ],
-    versions: [
-      {
-        id: 1,
-        version: '1.0',
-        timestamp: '2024-03-15T10:00:00',
-        author: 'finance_manager',
-        changes: 'Final version'
-      }
-    ],
-    analytics: {
-      views: 15,
-      downloads: 5,
-      lastAccessed: '2024-03-15T10:00:00'
-    }
-  },
-  {
-    id: 2,
-    name: 'Employee Handbook 2024',
-    type: 'DOCX',
-    department: 'HR',
-    status: 'in_review',
-    createdAt: '2024-03-12T14:30:00',
-    lastModified: '2024-03-14T15:30:00',
-    createdBy: '3',
-    sharedWith: ['Finance', 'IT'],
-    comments: [],
-    versions: [
-      {
-        id: 1,
-        version: '0.9',
-        timestamp: '2024-03-14T15:30:00',
-        author: 'hr_user',
-        changes: 'Updated policies'
-      }
-    ],
-    analytics: {
-      views: 8,
-      downloads: 3,
-      lastAccessed: '2024-03-14T16:00:00'
-    }
-  }
-];
+const initialDocuments = []
 
 const useDocumentStore = create(
   persist(
